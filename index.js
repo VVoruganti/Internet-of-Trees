@@ -13,6 +13,8 @@ var q = 0;
 var getResults = []
 var finished = false;
 
+var collection = "test"
+
 app.use(function(req,res,next){
     req.db = db;
     next();
@@ -30,14 +32,14 @@ function objToString (obj) {
 }
 
 var insertDocument = function(db, obj) {
-   db.collection('test').insertOne(obj, function(err, result) {
+   db.collection(collection).insertOne(obj, function(err, result) {
     console.log(result);
 //    callback();
   });
 };
 
 var getInfo = function(db, obj) {
-  var cursor = db.collection('test').find({});
+  var cursor = db.collection(collection).find({});
   var arr = Object.keys(cursor).map(function (key) {return cursor[key]; console.log(cursor[key])}); //object to array
   return cursor;
 };
@@ -59,8 +61,7 @@ app.get('/findinfo', function(req, res) {
 })
 
  var getQuery = function(db, query) {
-    var cursor = db.collection('test').find(query);
-    console.log("hai")
+    var cursor = db.collection(collection).find(query);
     return cursor.toArray();
  }
 
@@ -70,7 +71,6 @@ app.post('/upload', function(req, res) {
     q = req.body;
     insertDocument(db, q)
     p = getQuery(db, {})
-    console.log(p)
     p.then(function (result) {
       res.json( { notes: result })
     })
@@ -78,11 +78,23 @@ app.post('/upload', function(req, res) {
   });
 })
 
-app.post('/edit', function(req, res) {
+app.post('/delete', function(req, res) {
   MongoClient.connect(url, function(err, db) {
     if(err != null) return;
+      db.collection(collection).deleteOne({TreeID : req.body.TreeID}, false)
+        p = getQuery(db, {})
+        p.then(function (result) {
+          res.json( { notes: result })
+        })
+      })
+  });
+
+
+app.post('/edit', function(req, res) {
+  MongoClient.connect(url, function(err, db)  n
+    if(err != null) return;
     q = req.body;
-    db.collection('test').update({TreeID: q.TreeID},q );
+    db.collection(collection).update({TreeID: q.TreeID},q );
     p = getQuery(db, {})
     p.then(function (result) {
       res.json( { notes: result })
